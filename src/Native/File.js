@@ -1,6 +1,6 @@
 //import Native.File //
 
-var _elmcast$elm_node$Native_File = function() {
+var _syncrypt$elm_node$Native_File = function() {
 
     var fs = require('fs');
 

@@ -1,6 +1,6 @@
 //import Native.Path //
 
-var _elmcast$elm_node$Native_Path = function() {
+var _syncrypt$elm_node$Native_Path = function() {
 
     var path = require('path');
 

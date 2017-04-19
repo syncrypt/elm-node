@@ -1,4 +1,4 @@
-module Path
+module Node.Path
     exposing
         ( normalize
         , join

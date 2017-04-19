@@ -597,8 +597,7 @@ function toString(v)
 	var type = typeof v;
 	if (type === 'function')
 	{
-		var name = v.func ? v.func.name : v.name;
-		return '<function' + (name === '' ? '' : ':') + name + '>';
+		return '<function>';
 	}
 
 	if (type === 'boolean')
@@ -1105,6 +1104,13 @@ var _elm_lang$core$List$sortWith = _elm_lang$core$Native_List.sortWith;
 var _elm_lang$core$List$sortBy = _elm_lang$core$Native_List.sortBy;
 var _elm_lang$core$List$sort = function (xs) {
 	return A2(_elm_lang$core$List$sortBy, _elm_lang$core$Basics$identity, xs);
+};
+var _elm_lang$core$List$singleton = function (value) {
+	return {
+		ctor: '::',
+		_0: value,
+		_1: {ctor: '[]'}
+	};
 };
 var _elm_lang$core$List$drop = F2(
 	function (n, list) {
@@ -2498,15 +2504,8 @@ function setupIncomingPort(name, callback)
 		sentBeforeInit.push(value);
 	}
 
-	function postInitSend(incomingValue)
+	function postInitSend(value)
 	{
-		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
-		if (result.ctor === 'Err')
-		{
-			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
-		}
-
-		var value = result._0;
 		var temp = subs;
 		while (temp.ctor !== '[]')
 		{
@@ -2517,7 +2516,13 @@ function setupIncomingPort(name, callback)
 
 	function send(incomingValue)
 	{
-		currentSend(incomingValue);
+		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
+		if (result.ctor === 'Err')
+		{
+			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
+		}
+
+		currentSend(result._0);
 	}
 
 	return { send: send };
@@ -3138,7 +3143,7 @@ function endsWith(sub, str)
 function indexes(sub, str)
 {
 	var subLen = sub.length;
-	
+
 	if (subLen < 1)
 	{
 		return _elm_lang$core$Native_List.Nil;
@@ -3151,74 +3156,78 @@ function indexes(sub, str)
 	{
 		is.push(i);
 		i = i + subLen;
-	}	
-	
+	}
+
 	return _elm_lang$core$Native_List.fromArray(is);
 }
+
 
 function toInt(s)
 {
 	var len = s.length;
+
+	// if empty
 	if (len === 0)
 	{
-		return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int" );
+		return intErr(s);
 	}
-	var start = 0;
-	if (s[0] === '-')
+
+	// if hex
+	var c = s[0];
+	if (c === '0' && s[1] === 'x')
 	{
-		if (len === 1)
+		for (var i = 2; i < len; ++i)
 		{
-			return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int" );
+			var c = s[i];
+			if (('0' <= c && c <= '9') || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f'))
+			{
+				continue;
+			}
+			return intErr(s);
 		}
-		start = 1;
+		return _elm_lang$core$Result$Ok(parseInt(s, 16));
 	}
-	for (var i = start; i < len; ++i)
+
+	// is decimal
+	if (c > '9' || (c < '0' && c !== '-' && c !== '+'))
+	{
+		return intErr(s);
+	}
+	for (var i = 1; i < len; ++i)
 	{
 		var c = s[i];
 		if (c < '0' || '9' < c)
 		{
-			return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int" );
+			return intErr(s);
 		}
 	}
+
 	return _elm_lang$core$Result$Ok(parseInt(s, 10));
 }
 
+function intErr(s)
+{
+	return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int");
+}
+
+
 function toFloat(s)
 {
-	var len = s.length;
-	if (len === 0)
+	// check if it is a hex, octal, or binary number
+	if (s.length === 0 || /[\sxbo]/.test(s))
 	{
-		return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float" );
+		return floatErr(s);
 	}
-	var start = 0;
-	if (s[0] === '-')
-	{
-		if (len === 1)
-		{
-			return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float" );
-		}
-		start = 1;
-	}
-	var dotCount = 0;
-	for (var i = start; i < len; ++i)
-	{
-		var c = s[i];
-		if ('0' <= c && c <= '9')
-		{
-			continue;
-		}
-		if (c === '.')
-		{
-			dotCount += 1;
-			if (dotCount <= 1)
-			{
-				continue;
-			}
-		}
-		return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float" );
-	}
-	return _elm_lang$core$Result$Ok(parseFloat(s));
+	var n = +s;
+	// faster isNaN check
+	return n === n ? _elm_lang$core$Result$Ok(n) : floatErr(s);
 }
+
+function floatErr(s)
+{
+	return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float");
+}
+
 
 function toList(str)
 {
@@ -3358,7 +3367,7 @@ var _elm_lang$core$Tuple$first = function (_p6) {
 
 //import Native.Console //
 
-var _elmcast$elm_node$Native_Console = function() {
+var _syncrypt$elm_node$Native_Console = function() {
 
     function log(value) {
         return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
@@ -3411,19 +3420,19 @@ var _elmcast$elm_node$Native_Console = function() {
     }
 })();
 
-var _elmcast$elm_node$Console$fatal = function (value) {
-	return _elmcast$elm_node$Native_Console.fatal(value);
+var _syncrypt$elm_node$Node_Console$fatal = function (value) {
+	return _syncrypt$elm_node$Native_Console.fatal(value);
 };
-var _elmcast$elm_node$Console$error = function (value) {
-	return _elmcast$elm_node$Native_Console.error(value);
+var _syncrypt$elm_node$Node_Console$error = function (value) {
+	return _syncrypt$elm_node$Native_Console.error(value);
 };
-var _elmcast$elm_node$Console$log = function (value) {
-	return _elmcast$elm_node$Native_Console.log(value);
+var _syncrypt$elm_node$Node_Console$log = function (value) {
+	return _syncrypt$elm_node$Native_Console.log(value);
 };
 
 //import Native.Process //
 
-var _elmcast$elm_node$Native_Process = function() {
+var _syncrypt$elm_node$Native_Process = function() {
 
     var child = require('child_process');
 
@@ -3466,23 +3475,23 @@ var _elmcast$elm_node$Native_Process = function() {
     }
 })();
 
-var _elmcast$elm_node$NodeProcess$version = _elmcast$elm_node$Native_Process.version;
-var _elmcast$elm_node$NodeProcess$pid = _elmcast$elm_node$Native_Process.pid;
-var _elmcast$elm_node$NodeProcess$exit = function (code) {
-	return _elmcast$elm_node$Native_Process.exit(code);
+var _syncrypt$elm_node$Node_Process$version = _syncrypt$elm_node$Native_Process.version;
+var _syncrypt$elm_node$Node_Process$pid = _syncrypt$elm_node$Native_Process.pid;
+var _syncrypt$elm_node$Node_Process$exit = function (code) {
+	return _syncrypt$elm_node$Native_Process.exit(code);
 };
-var _elmcast$elm_node$NodeProcess$exec = function (command) {
-	return _elmcast$elm_node$Native_Process.exec(command);
+var _syncrypt$elm_node$Node_Process$exec = function (command) {
+	return _syncrypt$elm_node$Native_Process.exec(command);
 };
-var _elmcast$elm_node$NodeProcess$execArgv = _elmcast$elm_node$Native_Process.execArgv;
-var _elmcast$elm_node$NodeProcess$execPath = _elmcast$elm_node$Native_Process.execPath;
-var _elmcast$elm_node$NodeProcess$args = A2(_elm_lang$core$List$drop, 2, _elmcast$elm_node$Native_Process.argv);
-var _elmcast$elm_node$NodeProcess$argv = _elmcast$elm_node$Native_Process.argv;
+var _syncrypt$elm_node$Node_Process$execArgv = _syncrypt$elm_node$Native_Process.execArgv;
+var _syncrypt$elm_node$Node_Process$execPath = _syncrypt$elm_node$Native_Process.execPath;
+var _syncrypt$elm_node$Node_Process$args = A2(_elm_lang$core$List$drop, 2, _syncrypt$elm_node$Native_Process.argv);
+var _syncrypt$elm_node$Node_Process$argv = _syncrypt$elm_node$Native_Process.argv;
 
-var _elmcast$elm_node$Example$subscriptions = function (model) {
+var _syncrypt$elm_node$Example$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
-var _elmcast$elm_node$Example$update = F2(
+var _syncrypt$elm_node$Example$update = F2(
 	function (msg, model) {
 		return A2(
 			_elm_lang$core$Platform_Cmd_ops['!'],
@@ -3493,7 +3502,7 @@ var _elmcast$elm_node$Example$update = F2(
 				_1: {ctor: '[]'}
 			});
 	});
-var _elmcast$elm_node$Example$main = _elm_lang$core$Platform$program(
+var _syncrypt$elm_node$Example$main = _elm_lang$core$Platform$program(
 	{
 		init: {
 			ctor: '_Tuple2',
@@ -3503,23 +3512,23 @@ var _elmcast$elm_node$Example$main = _elm_lang$core$Platform$program(
 				function (_p0) {
 					return {ctor: '_Tuple0'};
 				},
-				_elmcast$elm_node$Console$log(
+				_syncrypt$elm_node$Node_Console$log(
 					A2(
 						_elm_lang$core$Basics_ops['++'],
 						'Hello Elm world!\n',
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							'Args: ',
-							_elm_lang$core$Basics$toString(_elmcast$elm_node$NodeProcess$args)))))
+							_elm_lang$core$Basics$toString(_syncrypt$elm_node$Node_Process$args)))))
 		},
-		update: _elmcast$elm_node$Example$update,
-		subscriptions: _elmcast$elm_node$Example$subscriptions
+		update: _syncrypt$elm_node$Example$update,
+		subscriptions: _syncrypt$elm_node$Example$subscriptions
 	})();
 
 var Elm = {};
 Elm['Example'] = Elm['Example'] || {};
-if (typeof _elmcast$elm_node$Example$main !== 'undefined') {
-    _elmcast$elm_node$Example$main(Elm['Example'], 'Example', undefined);
+if (typeof _syncrypt$elm_node$Example$main !== 'undefined') {
+    _syncrypt$elm_node$Example$main(Elm['Example'], 'Example', undefined);
 }
 
 if (typeof define === "function" && define['amd'])

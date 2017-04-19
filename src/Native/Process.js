@@ -1,6 +1,6 @@
 //import Native.Process //
 
-var _elmcast$elm_node$Native_Process = function() {
+var _syncrypt$elm_node$Native_Process = function() {
 
     var child = require('child_process');
 

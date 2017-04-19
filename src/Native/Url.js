@@ -1,6 +1,6 @@
 //import Native.Url //
 
-var _elmcast$elm_node$Native_Url = function() {
+var _syncrypt$elm_node$Native_Url = function() {
 
 	  var url = require('url');
 

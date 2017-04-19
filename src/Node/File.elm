@@ -1,4 +1,4 @@
-module File
+module Node.File
     exposing
         ( Error(..)
         , read

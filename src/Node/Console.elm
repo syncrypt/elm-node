@@ -1,4 +1,4 @@
-module Console
+module Node.Console
     exposing
         ( log
         , error

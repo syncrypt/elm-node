@@ -4,8 +4,8 @@ import Platform
 import Platform.Cmd as Cmd
 import Platform.Sub as Sub
 import Task
-import Console
-import NodeProcess
+import Node.Console
+import Node.Process
 
 
 type alias Model =
@@ -23,10 +23,10 @@ main =
             ( ()
             , Task.perform
                 (\_ -> ())
-                (Console.log <|
+                (Node.Console.log <|
                     "Hello Elm world!\n"
                         ++ "Args: "
-                        ++ toString NodeProcess.args
+                        ++ toString Node.Process.args
                 )
             )
         , update = update

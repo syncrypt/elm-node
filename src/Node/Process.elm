@@ -1,4 +1,4 @@
-module NodeProcess
+module Node.Process
     exposing
         ( args
         , argv

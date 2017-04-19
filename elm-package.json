@@ -1,18 +1,18 @@
 {
 	"version": "1.0.0",
 	"summary": "Elm libraries for server side development.",
-	"repository": "http://github.com/elmcast/elm-node.git",
+	"repository": "http://github.com/syncrypt/elm-node.git",
 	"license": "BSD3",
 	"source-directories": [
 		"src"
 	],
 	"exposed-modules": [
-		"Console",
-		"File",
-		"Http",
-		"Path",
-		"NodeProcess",
-		"Url"
+		"Node.Console",
+		"Node.File",
+		"Node.Http",
+		"Node.Path",
+		"Node.Process",
+		"Node.Url"
 	],
 	"native-modules": true,
 	"dependencies": {

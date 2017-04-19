@@ -1,4 +1,4 @@
-module Http
+module Node.Http
     exposing
         ( Error(..)
         , get

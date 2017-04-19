@@ -1,6 +1,6 @@
 //import Native.Console //
 
-var _elmcast$elm_node$Native_Console = function() {
+var _syncrypt$elm_node$Native_Console = function() {
 
     function log(value) {
         return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {

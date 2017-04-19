@@ -1,4 +1,4 @@
-module Url
+module Node.Url
     exposing
         ( resolve
         , join

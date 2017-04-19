@@ -1,6 +1,6 @@
 //import Native.Http //
 
-var _elmcast$elm_node$Native_Http = function() {
+var _syncrypt$elm_node$Native_Http = function() {
 
     var http = require('http');
 
